@@ -136,11 +136,62 @@ const mdcComponents = [
   'ComparisonTable', 'Timeline', 'SplitSlide', 'StepsList', 'Lightbox', 'Image'
 ]
 
+// Custom block rule for 2-colon MDC syntax (::Component{props})
+const mdcNamePattern = mdcComponents.join('|')
+const mdcOpenRegex = new RegExp('^::(?!:)(' + mdcNamePattern + ')(?:\\{[^}]*\\})?\\s*$')
+const mdcCloseRegex = /^::(?!:)\s*$/
+
+md.block.ruler.before('fence', 'mdc_block', function mdcBlock (state, startLine, endLine, silent) {
+  var startPos = state.bMarks[startLine] + state.tShift[startLine]
+  var maxPos = state.eMarks[startLine]
+  var lineText = state.src.slice(startPos, maxPos)
+
+  var openMatch = lineText.match(mdcOpenRegex)
+  if (!openMatch) return false
+  if (silent) return true
+
+  var componentName = openMatch[1]
+
+  var nextLine = startLine + 1
+  var found = false
+  for (; nextLine < endLine; nextLine++) {
+    var s = state.bMarks[nextLine] + state.tShift[nextLine]
+    var e = state.eMarks[nextLine]
+    var line = state.src.slice(s, e)
+    if (mdcCloseRegex.test(line)) {
+      found = true
+      break
+    }
+  }
+  if (!found) nextLine = endLine
+
+  var token_o = state.push('mdc_block_open', 'div', 1)
+  token_o.attrJoin('class', 'mdc-container')
+  token_o.attrJoin('class', 'mdc-' + componentName)
+  token_o.map = [startLine, nextLine]
+  token_o.block = true
+
+  var oldParent = state.parentType
+  var oldLineMax = state.lineMax
+  state.parentType = 'mdc_block'
+  state.lineMax = nextLine
+  state.md.block.tokenize(state, startLine + 1, nextLine)
+  state.parentType = oldParent
+  state.lineMax = oldLineMax
+
+  var token_c = state.push('mdc_block_close', 'div', -1)
+  token_c.block = true
+
+  state.line = nextLine + (found ? 1 : 0)
+  return true
+})
+
+// 3-colon variants via markdown-it-container
 function renderMdcSyncContainer (name) {
   return function (tokens, idx, options, env, self) {
     if (tokens[idx].nesting === 1) {
       tokens[idx].attrJoin('class', 'mdc-container')
-      tokens[idx].attrJoin('class', `mdc-${name}`)
+      tokens[idx].attrJoin('class', 'mdc-' + name)
       addPart(tokens, idx)
     }
     return self.renderToken(tokens, idx, options, env, self)
