@@ -1285,8 +1285,8 @@ md.use(markdownitContainer, 'danger', { render: renderContainer })
 require('../css/mdc-components.css')
 
 const mdcComponents = [
-  'TwoColumns', 'ThreeColumns', 'Centered', 'Callout', 'Mermaid',
-  'ComparisonTable', 'Timeline', 'SplitSlide', 'StepsList', 'Lightbox', 'Image',
+  'Quote', 'FullScreenImage', 'Iframe', 'Image', 'Mermaid', 'PreviewLink',
+  'Columns', 'TwoColumns', 'ThreeColumns',
   'column'
 ]
 
@@ -1395,8 +1395,35 @@ md.inline.ruler.push('mdc_icon', function mdcIconRule (state, silent) {
 })
 
 md.renderer.rules.mdc_icon = function (tokens, idx) {
-  const name = tokens[idx].content.replace(/[<>"'&]/g, '')
+  // Normalise Iconify format (ri:home-line) → CSS class format (ri-home-line)
+  const name = tokens[idx].content.replace(/[<>"'&]/g, '').replace(/:/g, '-')
   return '<i class="' + name + '" title="' + name + '"></i>'
+}
+
+// Inline :slide-background{image="..."}, :pretitle{text="..."}, :subtitle{text="..."}
+// These are annotation markers extracted by the nuxt-slides parser.
+// In CodiMD we render them as subtle visual hints.
+md.inline.ruler.push('mdc_annotation', function mdcAnnotationRule (state, silent) {
+  const src = state.src
+  const pos = state.pos
+  if (src.charCodeAt(pos) !== 0x3A /* : */) return false
+
+  const match = src.slice(pos).match(/^:(slide-background|pretitle|subtitle|layout)\{([^}]+)\}/)
+  if (!match) return false
+
+  if (!silent) {
+    const token = state.push('mdc_annotation', '', 0)
+    token.meta = { tag: match[1], attrs: match[2] }
+  }
+  state.pos = pos + match[0].length
+  return true
+})
+
+md.renderer.rules.mdc_annotation = function (tokens, idx) {
+  var meta = tokens[idx].meta
+  var tag = meta.tag.replace(/[<>"'&]/g, '')
+  var attrs = meta.attrs.replace(/[<>"'&]/g, '')
+  return '<span class="mdc-annotation mdc-annotation--' + tag + '" title="' + tag + '">' + tag + ': ' + attrs + '</span>'
 }
 // ── End MDC support ─────────────────────────────────────────────────────
 

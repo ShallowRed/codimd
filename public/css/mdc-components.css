@@ -27,13 +27,15 @@
   font-family: monospace;
 }
 
-/* ── TwoColumns ──────────────────────────────────────────────────────────── */
+/* ── TwoColumns / ThreeColumns (backward-compat aliases for Columns) ─────── */
+.mdc-Columns,
 .mdc-TwoColumns {
   border-color: #42a5f5;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1em;
 }
+.mdc-Columns::before { content: '::Columns'; color: #42a5f5; }
 .mdc-TwoColumns::before { content: '::TwoColumns'; color: #42a5f5; }
 
 /* ── ThreeColumns ────────────────────────────────────────────────────────── */
@@ -45,20 +47,14 @@
 }
 .mdc-ThreeColumns::before { content: '::ThreeColumns'; color: #66bb6a; }
 
-/* ── Centered ────────────────────────────────────────────────────────────── */
-.mdc-Centered {
+/* ── Quote ────────────────────────────────────────────────────────────────── */
+.mdc-Quote {
   border-color: #ab47bc;
-  text-align: center;
+  border-left: 4px solid #ab47bc;
+  background: #f3e5f5;
+  font-style: italic;
 }
-.mdc-Centered::before { content: '::Centered'; color: #ab47bc; }
-
-/* ── Callout ─────────────────────────────────────────────────────────────── */
-.mdc-Callout {
-  border-color: #ffa726;
-  border-left: 4px solid #ffa726;
-  background: #fff8e1;
-}
-.mdc-Callout::before { content: '::Callout'; color: #ffa726; }
+.mdc-Quote::before { content: '::Quote'; color: #ab47bc; }
 
 /* ── Mermaid ─────────────────────────────────────────────────────────────── */
 .mdc-Mermaid {
@@ -69,39 +65,18 @@
 }
 .mdc-Mermaid::before { content: '::Mermaid'; color: #26a69a; }
 
-/* ── ComparisonTable ─────────────────────────────────────────────────────── */
-.mdc-ComparisonTable {
+/* ── FullScreenImage ─────────────────────────────────────────────────────── */
+.mdc-FullScreenImage {
+  border-color: #607d8b;
+  text-align: center;
+}
+.mdc-FullScreenImage::before { content: '::FullScreenImage'; color: #607d8b; }
+
+/* ── Iframe ──────────────────────────────────────────────────────────────── */
+.mdc-Iframe {
   border-color: #5c6bc0;
 }
-.mdc-ComparisonTable::before { content: '::ComparisonTable'; color: #5c6bc0; }
-
-/* ── Timeline ────────────────────────────────────────────────────────────── */
-.mdc-Timeline {
-  border-color: #78909c;
-  border-left: 3px solid #78909c;
-}
-.mdc-Timeline::before { content: '::Timeline'; color: #78909c; }
-
-/* ── SplitSlide ──────────────────────────────────────────────────────────── */
-.mdc-SplitSlide {
-  border-color: #ef5350;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1em;
-}
-.mdc-SplitSlide::before { content: '::SplitSlide'; color: #ef5350; }
-
-/* ── StepsList ───────────────────────────────────────────────────────────── */
-.mdc-StepsList {
-  border-color: #8d6e63;
-}
-.mdc-StepsList::before { content: '::StepsList'; color: #8d6e63; }
-
-/* ── Lightbox ────────────────────────────────────────────────────────────── */
-.mdc-Lightbox {
-  border-color: #607d8b;
-}
-.mdc-Lightbox::before { content: '::Lightbox'; color: #607d8b; }
+.mdc-Iframe::before { content: '::Iframe'; color: #5c6bc0; }
 
 /* ── Image ───────────────────────────────────────────────────────────────── */
 .mdc-Image {
@@ -109,7 +84,13 @@
 }
 .mdc-Image::before { content: '::Image'; color: #607d8b; }
 
-/* ── column (explicit column wrapper inside TwoColumns/ThreeColumns) ───── */
+/* ── PreviewLink ─────────────────────────────────────────────────────────── */
+.mdc-PreviewLink {
+  border-color: #78909c;
+}
+.mdc-PreviewLink::before { content: '::PreviewLink'; color: #78909c; }
+
+/* ── column (explicit column wrapper inside Columns/TwoColumns/ThreeColumns) */
 .mdc-column {
   border: none;
   padding: 0;
@@ -117,3 +98,31 @@
   min-width: 0;
 }
 .mdc-column::before { display: none; }
+
+/* ── Slide-level annotations (:pretitle, :subtitle, :layout, :slide-background) */
+.mdc-annotation {
+  display: inline-block;
+  font-size: 0.75em;
+  font-family: monospace;
+  padding: 0.15em 0.6em;
+  border-radius: 3px;
+  margin: 0.3em 0;
+  color: #fff;
+  font-weight: 600;
+}
+
+.mdc-annotation--pretitle {
+  background: #7c4dff;
+}
+
+.mdc-annotation--subtitle {
+  background: #536dfe;
+}
+
+.mdc-annotation--layout {
+  background: #ef5350;
+}
+
+.mdc-annotation--slide-background {
+  background: #78909c;
+}
