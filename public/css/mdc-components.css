@@ -109,16 +109,16 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #7c4dff;
-  border-left: 3px solid #7c4dff;
+  color: #546e7a;
+  border-left: 3px solid #546e7a;
   padding: 0.1em 0.5em;
 }
 
 .mdc-annotation--subtitle {
   font-size: 0.85em;
   font-style: italic;
-  color: #536dfe;
-  border-left: 3px solid #536dfe;
+  color: #546e7a;
+  border-left: 3px solid #546e7a;
   padding: 0.1em 0.5em;
 }
 
