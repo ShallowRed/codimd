@@ -1,3 +1,6 @@
+/* Remix Icon for :i{name="ri-..."} MDC syntax */
+@import url('https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.min.css');
+
 /* MDC Components Preview Styles for CodiMD
  * Provides a visual approximation of MDC components in the editor preview.
  * These don't replicate the exact Nuxt rendering, but make MDC syntax
@@ -105,15 +108,3 @@
   border-color: #607d8b;
 }
 .mdc-Image::before { content: '::Image'; color: #607d8b; }
-
-/* ── Inline icon placeholder (:i{name="..."}) ───────────────────────────── */
-.mdc-icon {
-  display: inline-block;
-  font-size: 0.8em;
-  color: #546e7a;
-  background: #eceff1;
-  border-radius: 3px;
-  padding: 0.1em 0.4em;
-  font-family: monospace;
-  vertical-align: middle;
-}

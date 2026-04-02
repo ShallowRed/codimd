@@ -1389,7 +1389,7 @@ md.inline.ruler.push('mdc_icon', function mdcIconRule (state, silent) {
 
 md.renderer.rules.mdc_icon = function (tokens, idx) {
   const name = tokens[idx].content.replace(/[<>"'&]/g, '')
-  return `<span class="mdc-icon" title="${name}">⬡ ${name.split(/[-:]/).pop()}</span>`
+  return '<i class="' + name + '" title="' + name + '"></i>'
 }
 // ── End MDC support ─────────────────────────────────────────────────────
 
