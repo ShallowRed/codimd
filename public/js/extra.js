@@ -1422,8 +1422,35 @@ md.inline.ruler.push('mdc_annotation', function mdcAnnotationRule (state, silent
 md.renderer.rules.mdc_annotation = function (tokens, idx) {
   var meta = tokens[idx].meta
   var tag = meta.tag.replace(/[<>"'&]/g, '')
-  var attrs = meta.attrs.replace(/[<>"'&]/g, '')
-  return '<span class="mdc-annotation mdc-annotation--' + tag + '" title="' + tag + '">' + tag + ': ' + attrs + '</span>'
+  var rawAttrs = meta.attrs.replace(/[<>"'&]/g, '')
+
+  // Parse key=value pairs
+  var parsed = {}
+  var re = /(\w+)=(?:"([^"]*)"|(\S+))/g
+  var m
+  while ((m = re.exec(rawAttrs)) !== null) {
+    parsed[m[1]] = m[2] !== undefined ? m[2] : m[3]
+  }
+
+  var fullTitle = ':' + tag + '{' + rawAttrs + '}'
+
+  if (tag === 'pretitle' || tag === 'subtitle') {
+    var text = parsed.text || rawAttrs
+    return '<span class="mdc-annotation mdc-annotation--' + tag + '" title="' + fullTitle + '">' + text + '</span>'
+  }
+
+  if (tag === 'layout') {
+    var layoutName = parsed.name || 'layout'
+    return '<span class="mdc-annotation mdc-annotation--layout" title="' + fullTitle + '"><i class="ri-layout-3-line"></i> ' + layoutName + '</span>'
+  }
+
+  if (tag === 'slide-background') {
+    var img = parsed.image || parsed.src || rawAttrs
+    var short = img.split('/').pop()
+    return '<span class="mdc-annotation mdc-annotation--slide-background" title="' + fullTitle + '"><i class="ri-image-line"></i> ' + short + '</span>'
+  }
+
+  return '<span class="mdc-annotation" title="' + fullTitle + '">' + tag + '</span>'
 }
 // ── End MDC support ─────────────────────────────────────────────────────
 
