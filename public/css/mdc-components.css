@@ -108,3 +108,12 @@
   border-color: #607d8b;
 }
 .mdc-Image::before { content: '::Image'; color: #607d8b; }
+
+/* ── column (explicit column wrapper inside TwoColumns/ThreeColumns) ───── */
+.mdc-column {
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.mdc-column::before { display: none; }

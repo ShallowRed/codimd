@@ -1286,7 +1286,8 @@ require('../css/mdc-components.css')
 
 const mdcComponents = [
   'TwoColumns', 'ThreeColumns', 'Centered', 'Callout', 'Mermaid',
-  'ComparisonTable', 'Timeline', 'SplitSlide', 'StepsList', 'Lightbox', 'Image'
+  'ComparisonTable', 'Timeline', 'SplitSlide', 'StepsList', 'Lightbox', 'Image',
+  'column'
 ]
 
 // Custom block rule for 2-colon MDC syntax (::Component{props})
@@ -1306,16 +1307,22 @@ md.block.ruler.before('fence', 'mdc_block', function mdcBlock (state, startLine,
 
   var componentName = openMatch[1]
 
-  // Find closing ::
+  // Find closing :: (tracking nesting depth)
   var nextLine = startLine + 1
   var found = false
+  var depth = 1
   for (; nextLine < endLine; nextLine++) {
     var s = state.bMarks[nextLine] + state.tShift[nextLine]
     var e = state.eMarks[nextLine]
     var line = state.src.slice(s, e)
-    if (mdcCloseRegex.test(line)) {
-      found = true
-      break
+    if (mdcOpenRegex.test(line)) {
+      depth++
+    } else if (mdcCloseRegex.test(line)) {
+      depth--
+      if (depth === 0) {
+        found = true
+        break
+      }
     }
   }
   if (!found) nextLine = endLine
