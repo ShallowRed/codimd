@@ -1279,6 +1279,67 @@ md.use(markdownitContainer, 'success', { render: renderContainer })
 md.use(markdownitContainer, 'info', { render: renderContainer })
 md.use(markdownitContainer, 'warning', { render: renderContainer })
 md.use(markdownitContainer, 'danger', { render: renderContainer })
+
+// ── MDC Component Containers (nuxt-slides preview support) ──────────────
+// Register containers for MDC syntax (::Component and :::Component)
+require('../css/mdc-components.css')
+
+const mdcComponents = [
+  'TwoColumns', 'ThreeColumns', 'Centered', 'Callout', 'Mermaid',
+  'ComparisonTable', 'Timeline', 'SplitSlide', 'StepsList', 'Lightbox', 'Image'
+]
+
+function renderMdcContainer (name) {
+  return function (tokens, idx, options, env, self) {
+    if (tokens[idx].nesting === 1) {
+      tokens[idx].attrJoin('class', 'mdc-container')
+      tokens[idx].attrJoin('class', `mdc-${name}`)
+    }
+    return self.renderToken(tokens, idx, options, env, self)
+  }
+}
+
+mdcComponents.forEach(function (name) {
+  md.use(markdownitContainer, name, {
+    marker: ':',
+    validate: function (params) {
+      return params.trim().split(/[\s{]/)[0] === name
+    },
+    render: renderMdcContainer(name)
+  })
+})
+
+// Inline :i{name="icon-name"} → render as icon placeholder
+md.inline.ruler.push('mdc_icon', function mdcIconRule (state, silent) {
+  const src = state.src
+  const pos = state.pos
+
+  if (src.charCodeAt(pos) !== 0x3A /* : */) return false
+  if (src.charAt(pos + 1) !== 'i') return false
+  if (src.charAt(pos + 2) !== '{') return false
+
+  const closeIdx = src.indexOf('}', pos + 3)
+  if (closeIdx === -1) return false
+
+  if (!silent) {
+    const attrs = src.slice(pos + 3, closeIdx)
+    const nameMatch = attrs.match(/name=["']([^"']+)["']/)
+    const iconName = nameMatch ? nameMatch[1] : attrs
+
+    const token = state.push('mdc_icon', '', 0)
+    token.content = iconName
+  }
+
+  state.pos = closeIdx + 1
+  return true
+})
+
+md.renderer.rules.mdc_icon = function (tokens, idx) {
+  const name = tokens[idx].content.replace(/[<>"'&]/g, '')
+  return `<span class="mdc-icon" title="${name}">⬡ ${name.split(/[-:]/).pop()}</span>`
+}
+// ── End MDC support ─────────────────────────────────────────────────────
+
 md.use(markdownitContainer, 'spoiler', {
   validate: function (params) {
     return params.trim().match(/^spoiler(\s+.*)?$/)

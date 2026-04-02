@@ -1,0 +1,119 @@
+/* MDC Components Preview Styles for CodiMD
+ * Provides a visual approximation of MDC components in the editor preview.
+ * These don't replicate the exact Nuxt rendering, but make MDC syntax
+ * readable and visually structured in the split-view editor.
+ */
+
+/* ── Generic MDC container base ──────────────────────────────────────────── */
+.mdc-container {
+  border: 1px dashed #b0bec5;
+  border-radius: 6px;
+  padding: 1em 1.2em;
+  margin: 0.8em 0;
+  position: relative;
+}
+
+.mdc-container::before {
+  position: absolute;
+  top: -0.7em;
+  left: 0.8em;
+  background: #fff;
+  padding: 0 0.4em;
+  font-size: 0.75em;
+  color: #78909c;
+  font-family: monospace;
+}
+
+/* ── TwoColumns ──────────────────────────────────────────────────────────── */
+.mdc-TwoColumns {
+  border-color: #42a5f5;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1em;
+}
+.mdc-TwoColumns::before { content: '::TwoColumns'; color: #42a5f5; }
+
+/* ── ThreeColumns ────────────────────────────────────────────────────────── */
+.mdc-ThreeColumns {
+  border-color: #66bb6a;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1em;
+}
+.mdc-ThreeColumns::before { content: '::ThreeColumns'; color: #66bb6a; }
+
+/* ── Centered ────────────────────────────────────────────────────────────── */
+.mdc-Centered {
+  border-color: #ab47bc;
+  text-align: center;
+}
+.mdc-Centered::before { content: '::Centered'; color: #ab47bc; }
+
+/* ── Callout ─────────────────────────────────────────────────────────────── */
+.mdc-Callout {
+  border-color: #ffa726;
+  border-left: 4px solid #ffa726;
+  background: #fff8e1;
+}
+.mdc-Callout::before { content: '::Callout'; color: #ffa726; }
+
+/* ── Mermaid ─────────────────────────────────────────────────────────────── */
+.mdc-Mermaid {
+  border-color: #26a69a;
+  background: #e0f2f1;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+.mdc-Mermaid::before { content: '::Mermaid'; color: #26a69a; }
+
+/* ── ComparisonTable ─────────────────────────────────────────────────────── */
+.mdc-ComparisonTable {
+  border-color: #5c6bc0;
+}
+.mdc-ComparisonTable::before { content: '::ComparisonTable'; color: #5c6bc0; }
+
+/* ── Timeline ────────────────────────────────────────────────────────────── */
+.mdc-Timeline {
+  border-color: #78909c;
+  border-left: 3px solid #78909c;
+}
+.mdc-Timeline::before { content: '::Timeline'; color: #78909c; }
+
+/* ── SplitSlide ──────────────────────────────────────────────────────────── */
+.mdc-SplitSlide {
+  border-color: #ef5350;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1em;
+}
+.mdc-SplitSlide::before { content: '::SplitSlide'; color: #ef5350; }
+
+/* ── StepsList ───────────────────────────────────────────────────────────── */
+.mdc-StepsList {
+  border-color: #8d6e63;
+}
+.mdc-StepsList::before { content: '::StepsList'; color: #8d6e63; }
+
+/* ── Lightbox ────────────────────────────────────────────────────────────── */
+.mdc-Lightbox {
+  border-color: #607d8b;
+}
+.mdc-Lightbox::before { content: '::Lightbox'; color: #607d8b; }
+
+/* ── Image ───────────────────────────────────────────────────────────────── */
+.mdc-Image {
+  border-color: #607d8b;
+}
+.mdc-Image::before { content: '::Image'; color: #607d8b; }
+
+/* ── Inline icon placeholder (:i{name="..."}) ───────────────────────────── */
+.mdc-icon {
+  display: inline-block;
+  font-size: 0.8em;
+  color: #546e7a;
+  background: #eceff1;
+  border-radius: 3px;
+  padding: 0.1em 0.4em;
+  font-family: monospace;
+  vertical-align: middle;
+}

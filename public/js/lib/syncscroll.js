@@ -129,6 +129,35 @@ md.use(markdownitContainer, 'success', { render: renderContainer })
 md.use(markdownitContainer, 'info', { render: renderContainer })
 md.use(markdownitContainer, 'warning', { render: renderContainer })
 md.use(markdownitContainer, 'danger', { render: renderContainer })
+
+// ── MDC Component Containers (nuxt-slides preview support) ──────────────
+const mdcComponents = [
+  'TwoColumns', 'ThreeColumns', 'Centered', 'Callout', 'Mermaid',
+  'ComparisonTable', 'Timeline', 'SplitSlide', 'StepsList', 'Lightbox', 'Image'
+]
+
+function renderMdcSyncContainer (name) {
+  return function (tokens, idx, options, env, self) {
+    if (tokens[idx].nesting === 1) {
+      tokens[idx].attrJoin('class', 'mdc-container')
+      tokens[idx].attrJoin('class', `mdc-${name}`)
+      addPart(tokens, idx)
+    }
+    return self.renderToken(tokens, idx, options, env, self)
+  }
+}
+
+mdcComponents.forEach(function (name) {
+  md.use(markdownitContainer, name, {
+    marker: ':',
+    validate: function (params) {
+      return params.trim().split(/[\s{]/)[0] === name
+    },
+    render: renderMdcSyncContainer(name)
+  })
+})
+// ── End MDC support ─────────────────────────────────────────────────────
+
 md.use(markdownitContainer, 'spoiler', {
   validate: function (params) {
     return params.trim().match(/^spoiler(\s+.*)?$/)
