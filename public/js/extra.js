@@ -1408,7 +1408,7 @@ md.inline.ruler.push('mdc_annotation', function mdcAnnotationRule (state, silent
   const pos = state.pos
   if (src.charCodeAt(pos) !== 0x3A /* : */) return false
 
-  const match = src.slice(pos).match(/^:(slide-background|pretitle|subtitle|layout)\{([^}]+)\}/)
+  const match = src.slice(pos).match(/^:(slide-background|pretitle|subtitle|layout|quicklink)\{([^}]+)\}/)
   if (!match) return false
 
   if (!silent) {
@@ -1422,15 +1422,16 @@ md.inline.ruler.push('mdc_annotation', function mdcAnnotationRule (state, silent
 md.renderer.rules.mdc_annotation = function (tokens, idx) {
   var meta = tokens[idx].meta
   var tag = meta.tag.replace(/[<>"'&]/g, '')
-  var rawAttrs = meta.attrs.replace(/[<>"'&]/g, '')
 
-  // Parse key=value pairs
+  // Parse key=value pairs BEFORE sanitizing, so quoted values with spaces work
   var parsed = {}
   var re = /(\w+)=(?:"([^"]*)"|(\S+))/g
   var m
-  while ((m = re.exec(rawAttrs)) !== null) {
-    parsed[m[1]] = m[2] !== undefined ? m[2] : m[3]
+  while ((m = re.exec(meta.attrs)) !== null) {
+    var val = m[2] !== undefined ? m[2] : m[3]
+    parsed[m[1]] = val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
   }
+  var rawAttrs = meta.attrs.replace(/[<>"'&]/g, '')
 
   var fullTitle = ':' + tag + '{' + rawAttrs + '}'
 
@@ -1448,6 +1449,12 @@ md.renderer.rules.mdc_annotation = function (tokens, idx) {
     var img = parsed.image || parsed.src || rawAttrs
     var short = img.split('/').pop()
     return '<span class="mdc-annotation mdc-annotation--slide-background" title="' + fullTitle + '"><i class="ri-image-line"></i> ' + short + '</span>'
+  }
+
+  if (tag === 'quicklink') {
+    var linkText = parsed.text || 'quicklink'
+    var linkHref = parsed.href || '#'
+    return '<a class="mdc-annotation mdc-annotation--quicklink" href="' + linkHref + '"><i class="ri-arrow-right-line"></i> ' + linkText + '</a>'
   }
 
   return '<span class="mdc-annotation" title="' + fullTitle + '">' + tag + '</span>'
