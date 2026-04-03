@@ -1287,6 +1287,7 @@ require('../css/mdc-components.css')
 const mdcComponents = [
   'Quote', 'FullScreenImage', 'Iframe', 'Image', 'Mermaid', 'PreviewLink',
   'Columns', 'TwoColumns', 'ThreeColumns',
+  'Highlight',
   'column'
 ]
 
