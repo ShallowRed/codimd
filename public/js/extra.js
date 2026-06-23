@@ -33,6 +33,14 @@ import { sanitizeUrl, isPdfUrl } from './utils'
 import markdownit from 'markdown-it'
 import markdownitContainer from 'markdown-it-container'
 
+// Single source of truth for the deck preview syntax, generated from
+// nuxt-slides/shared/deck/components.ts (npm run gen:deck-contract).
+import {
+  COMPONENT_NAMES as MDC_COMPONENT_NAMES,
+  ANNOTATION_TAGS as MDC_ANNOTATION_TAGS,
+  iconNameToCssClass as mdcIconNameToCssClass
+} from './lib/deck-contract.generated'
+
 /* Defined regex markdown it plugins */
 import Plugin from 'markdown-it-regexp'
 
@@ -1287,8 +1295,7 @@ require('../css/mdc-components.css')
 // Single source of truth: generated from nuxt-slides/shared/deck/components.ts
 // (npm run gen:deck-contract). The preview no longer hand-maintains its own
 // drifting list of components/annotations/icon rules (audit Axe G / item #13).
-const deckContract = require('./lib/deck-contract.generated.js')
-const mdcComponents = deckContract.COMPONENT_NAMES
+const mdcComponents = MDC_COMPONENT_NAMES
 
 // Custom block rule for 2-colon MDC syntax (::Component{props})
 // markdown-it-container requires 3+ colons, so we handle 2-colon separately
@@ -1414,7 +1421,7 @@ md.renderer.rules.mdc_icon = function (tokens, idx) {
   // (ri-home-line) per the shared contract, then emit the RemixIcon CSS class
   // the preview renders with. Ends the ri: vs ri- drift (audit Axe G).
   const raw = tokens[idx].content.replace(/[<>"'&]/g, '')
-  const cssClass = deckContract.iconNameToCssClass(raw)
+  const cssClass = mdcIconNameToCssClass(raw)
   return '<i class="' + cssClass + '" title="' + cssClass + '"></i>'
 }
 
@@ -1422,7 +1429,7 @@ md.renderer.rules.mdc_icon = function (tokens, idx) {
 // These are annotation markers extracted by the nuxt-slides parser.
 // In CodiMD we render them as subtle visual hints. The tag list is the shared
 // contract's ANNOTATION_TAGS (audit Axe G) instead of a hand-kept literal.
-const mdcAnnotationRegex = new RegExp('^:(' + deckContract.ANNOTATION_TAGS.join('|') + ')\\{([^}]+)\\}')
+const mdcAnnotationRegex = new RegExp('^:(' + MDC_ANNOTATION_TAGS.join('|') + ')\\{([^}]+)\\}')
 md.inline.ruler.push('mdc_annotation', function mdcAnnotationRule (state, silent) {
   const src = state.src
   const pos = state.pos
