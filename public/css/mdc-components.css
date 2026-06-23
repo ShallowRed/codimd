@@ -87,6 +87,34 @@
 }
 .mdc-PreviewLink::before { content: '::PreviewLink'; color: #78909c; }
 
+/* ── IconInline (alias `i`) ──────────────────────────────────────────────── */
+.mdc-IconInline,
+.mdc-i {
+  border-color: #8d6e63;
+  display: inline-block;
+}
+.mdc-IconInline::before { content: '::IconInline'; color: #8d6e63; }
+.mdc-i::before { content: '::i'; color: #8d6e63; }
+
+/* ── StoryFrame ──────────────────────────────────────────────────────────── */
+.mdc-StoryFrame {
+  border-color: #ec407a;
+}
+.mdc-StoryFrame::before { content: '::StoryFrame'; color: #ec407a; }
+
+/* ── Screens ─────────────────────────────────────────────────────────────── */
+.mdc-Screens {
+  border-color: #7e57c2;
+}
+.mdc-Screens::before { content: '::Screens'; color: #7e57c2; }
+
+/* ── full-screen-image (alias of FullScreenImage) ────────────────────────── */
+.mdc-full-screen-image {
+  border-color: #607d8b;
+  text-align: center;
+}
+.mdc-full-screen-image::before { content: '::full-screen-image'; color: #607d8b; }
+
 /* ── column (explicit column wrapper inside Columns/TwoColumns/ThreeColumns) */
 .mdc-column {
   border: none;

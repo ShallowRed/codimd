@@ -1284,12 +1284,11 @@ md.use(markdownitContainer, 'danger', { render: renderContainer })
 // Register containers for MDC syntax (::Component and :::Component)
 require('../css/mdc-components.css')
 
-const mdcComponents = [
-  'Quote', 'FullScreenImage', 'Iframe', 'Image', 'Mermaid', 'PreviewLink',
-  'Columns', 'TwoColumns', 'ThreeColumns',
-  'Highlight',
-  'column'
-]
+// Single source of truth: generated from nuxt-slides/shared/deck/components.ts
+// (npm run gen:deck-contract). The preview no longer hand-maintains its own
+// drifting list of components/annotations/icon rules (audit Axe G / item #13).
+const deckContract = require('./lib/deck-contract.generated.js')
+const mdcComponents = deckContract.COMPONENT_NAMES
 
 // Custom block rule for 2-colon MDC syntax (::Component{props})
 // markdown-it-container requires 3+ colons, so we handle 2-colon separately
@@ -1326,7 +1325,22 @@ md.block.ruler.before('fence', 'mdc_block', function mdcBlock (state, startLine,
       }
     }
   }
-  if (!found) nextLine = endLine
+
+  // Self-closing form: `::Image{...}` with no matching `::` close. The slides
+  // parser treats these as self-closing (Image/Iframe/IconInline/… carry their
+  // content in props), so the preview must NOT swallow the rest of the document
+  // looking for a close — render an empty container for just the opening line.
+  if (!found) {
+    var token_self = state.push('mdc_block_open', 'div', 1)
+    token_self.attrJoin('class', 'mdc-container')
+    token_self.attrJoin('class', 'mdc-' + componentName)
+    token_self.map = [startLine, startLine + 1]
+    token_self.block = true
+    var token_selfClose = state.push('mdc_block_close', 'div', -1)
+    token_selfClose.block = true
+    state.line = startLine + 1
+    return true
+  }
 
   var token_o = state.push('mdc_block_open', 'div', 1)
   token_o.attrJoin('class', 'mdc-container')
@@ -1345,7 +1359,7 @@ md.block.ruler.before('fence', 'mdc_block', function mdcBlock (state, startLine,
   var token_c = state.push('mdc_block_close', 'div', -1)
   token_c.block = true
 
-  state.line = nextLine + (found ? 1 : 0)
+  state.line = nextLine + 1
   return true
 })
 
@@ -1396,20 +1410,25 @@ md.inline.ruler.push('mdc_icon', function mdcIconRule (state, silent) {
 })
 
 md.renderer.rules.mdc_icon = function (tokens, idx) {
-  // Normalise Iconify format (ri:home-line) → CSS class format (ri-home-line)
-  const name = tokens[idx].content.replace(/[<>"'&]/g, '').replace(/:/g, '-')
-  return '<i class="' + name + '" title="' + name + '"></i>'
+  // Accept BOTH the Iconify form (ri:home-line) and the Remix CSS-class form
+  // (ri-home-line) per the shared contract, then emit the RemixIcon CSS class
+  // the preview renders with. Ends the ri: vs ri- drift (audit Axe G).
+  const raw = tokens[idx].content.replace(/[<>"'&]/g, '')
+  const cssClass = deckContract.iconNameToCssClass(raw)
+  return '<i class="' + cssClass + '" title="' + cssClass + '"></i>'
 }
 
 // Inline :slide-background{image="..."}, :pretitle{text="..."}, :subtitle{text="..."}
 // These are annotation markers extracted by the nuxt-slides parser.
-// In CodiMD we render them as subtle visual hints.
+// In CodiMD we render them as subtle visual hints. The tag list is the shared
+// contract's ANNOTATION_TAGS (audit Axe G) instead of a hand-kept literal.
+const mdcAnnotationRegex = new RegExp('^:(' + deckContract.ANNOTATION_TAGS.join('|') + ')\\{([^}]+)\\}')
 md.inline.ruler.push('mdc_annotation', function mdcAnnotationRule (state, silent) {
   const src = state.src
   const pos = state.pos
   if (src.charCodeAt(pos) !== 0x3A /* : */) return false
 
-  const match = src.slice(pos).match(/^:(slide-background|pretitle|subtitle|layout|quicklink)\{([^}]+)\}/)
+  const match = src.slice(pos).match(mdcAnnotationRegex)
   if (!match) return false
 
   if (!silent) {
