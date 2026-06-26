@@ -1,0 +1,86 @@
+# =============================================================================
+# CodiMD (fork ShallowRed) — stack Docker autonome pour self-hosting VPS.
+#
+# Rapatriement depuis Scalingo. Stack indépendant : app + son Postgres.
+#   - database : Postgres dédié à CodiMD
+#   - codimd   : build du fork (branche deck-contract-preview) via le Dockerfile
+#                upstream (deployments/Dockerfile)
+#   - proxy    : assuré par le Caddy central du repo vps-infra via le réseau edge
+#
+# Démarrage :  cp .env.example .env && $EDITOR .env && docker network create edge && docker compose up -d --build
+# Migration des données : voir README.md
+# =============================================================================
+
+name: codimd
+
+services:
+  database:
+    image: postgres:14-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    volumes:
+      - database-data:/var/lib/postgresql/data
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD", "pg_isready", "--username=${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  codimd:
+    build:
+      # Contexte = racine du fork (un cran au-dessus de infra/).
+      context: ..
+      dockerfile: ./infra/Dockerfile
+      args:
+        # Images officielles CodiMD pour Node 16.20.2 (cf. deployments/docker-compose.yml).
+        RUNTIME: hackmdio/runtime:16.20.2-35fe7e39
+        BUILDPACK: hackmdio/buildpack:16.20.2-35fe7e39
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      CMD_DB_URL: postgres://${DB_USER}:${DB_PASSWORD}@database/${DB_DATABASE}
+      CMD_DOMAIN: ${CMD_DOMAIN}
+      CMD_PROTOCOL_USESSL: "true"
+      CMD_URL_ADDPORT: "false"
+      CMD_PORT: "3000"
+      CMD_USECDN: "false"
+      # Reprend la config Scalingo (permissions / anonymous).
+      CMD_ALLOW_ANONYMOUS: ${CMD_ALLOW_ANONYMOUS:-true}
+      CMD_ALLOW_ANONYMOUS_EDITS: ${CMD_ALLOW_ANONYMOUS_EDITS:-true}
+      CMD_DEFAULT_PERMISSION: ${CMD_DEFAULT_PERMISSION:-editable}
+      CMD_SESSION_SECRET: ${CMD_SESSION_SECRET}
+      # Uploads sur volume persistant (sur Scalingo le FS était éphémère).
+      CMD_IMAGE_UPLOAD_TYPE: filesystem
+      CMD_AUTO_MIGRATE: "true"
+    volumes:
+      - upload-data:/home/hackmd/app/public/uploads
+    networks:
+      - internal
+      - edge
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+
+networks:
+  internal:
+    driver: bridge
+  edge:
+    external: true
+
+volumes:
+  database-data:
+  upload-data:

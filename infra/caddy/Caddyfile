@@ -1,0 +1,23 @@
+# Reverse-proxy Caddy — CodiMD
+# HTTPS automatique (Let's Encrypt) dès que le domaine pointe vers le VPS.
+
+{
+	servers {
+		trusted_proxies static private_ranges
+		trusted_proxies_strict
+	}
+}
+
+# Pas de directive `encode` : CodiMD gère sa propre compression. Réencoder ici
+# risquerait de double-compresser certaines réponses.
+{$CMD_DOMAIN} {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains;"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+	# CodiMD utilise des WebSockets (édition collaborative temps réel) — Caddy
+	# les proxifie de façon transparente avec reverse_proxy.
+	reverse_proxy codimd:3000
+}
